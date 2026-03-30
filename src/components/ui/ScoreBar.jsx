@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function ScoreBar({ score, max = 14.4 }) {
+export default function ScoreBar({ score, max = 10.0 }) {
   const percentage = Math.min(100, Math.max(0, (score / max) * 100))
   
   return (

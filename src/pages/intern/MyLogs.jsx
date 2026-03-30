@@ -177,7 +177,7 @@ export default function MyLogs() {
                           <MoodBadge mood={log.mood} />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-primary-700 font-semibold flex items-center justify-between">
-                          {log.productivity_score}
+                          {log.productivity_score} / 10.0
                         </td>
                       </tr>
                       {isExpanded && log.blockers && (

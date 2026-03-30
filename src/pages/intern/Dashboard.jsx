@@ -152,7 +152,7 @@ export default function Dashboard() {
         <StatCard 
           icon={BarChart2} 
           label="Avg Score This Week" 
-          value={`${stats.avgScoreThisWeek} / 14.4`}
+          value={`${stats.avgScoreThisWeek} / 10.0`}
           iconColor="text-indigo-600"
           iconBg="bg-indigo-50"
         />
