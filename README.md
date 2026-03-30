@@ -1,6 +1,10 @@
 # 🚀 Intern~Flow
 ### *Empowering Interns, Streamlining Workflows.*
 
+🔗 **Live App:** [internflow-arova.netlify.app](https://internflow-arova.netlify.app)
+
+---
+
 **Intern~Flow** is a modern productivity and engagement platform designed to bridge the gap between interns and management. It provides a seamless way for interns to track their daily progress, while offering admins a birds-eye view of team productivity and project health.
 
 ---
