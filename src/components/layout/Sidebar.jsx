@@ -38,7 +38,12 @@ export default function Sidebar() {
     }
   }
 
-  const getInitials = (email) => {
+  const getInitials = (name, email) => {
+    if (name) {
+      const parts = name.split(' ')
+      if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
+      return name.substring(0, 2).toUpperCase()
+    }
     return email ? email.substring(0, 2).toUpperCase() : 'U'
   }
 
@@ -82,10 +87,12 @@ export default function Sidebar() {
         <div className="mt-8 px-4">
           <div className="flex items-center gap-3 mb-6 p-3 rounded-xl bg-white/50 border border-gray-100">
             <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold shrink-0">
-              {getInitials(user?.email)}
+              {getInitials(user?.user_metadata?.full_name, user?.email)}
             </div>
             <div className="overflow-hidden">
-              <p className="text-sm font-semibold text-gray-900 truncate">{user?.email}</p>
+              <p className="text-sm font-semibold text-gray-900 truncate">
+                {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
+              </p>
               {role === 'admin' && (
                 <span className="inline-block mt-0.5 px-2 py-0.5 bg-purple-100 text-purple-800 text-xs rounded-full font-medium">Admin</span>
               )}
