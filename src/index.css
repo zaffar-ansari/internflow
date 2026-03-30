@@ -1,20 +1,28 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   html, body {
-    @apply font-body text-gray-900 bg-white antialiased min-h-screen overflow-x-hidden;
+    font-family: 'DM Sans', sans-serif;
+    color: #111827; /* Gray-900 */
+    background-color: #ffffff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
+  
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
+    font-family: 'Plus Jakarta Sans', sans-serif;
   }
 }
 
 @layer utilities {
   .glass {
-    @apply backdrop-blur-[16px] bg-white/60 border border-white/80 shadow-[0_8px_32px_rgba(31,38,135,0.08)];
+    backdrop-filter: blur(16px);
+    background-color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px rgba(31, 38, 135, 0.08);
   }
 }
