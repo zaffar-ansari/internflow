@@ -7,8 +7,13 @@ export const calculateScore = (hoursWorked, mood) => {
   }
 
   const weight = moodWeights[mood] || 1.0;
-  const rawScore = hoursWorked * weight;
   
-  // Round to 1 decimal place
-  return Math.round(rawScore * 10) / 10;
+  // Base score: 8 hours = 10 points
+  const baseScore = (hoursWorked / 8) * 10;
+  const rawScore = baseScore * weight;
+  
+  // Cap at 10.0 and round to 1 decimal place
+  const finalScore = Math.min(10, Math.round(rawScore * 10) / 10);
+  
+  return finalScore;
 }

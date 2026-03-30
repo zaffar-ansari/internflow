@@ -170,7 +170,7 @@ export default function LogToday() {
              </div>
              <div>
                <p className="text-sm text-gray-500 font-medium">Score</p>
-               <p className="text-primary-700 font-semibold text-xl">{existingLog.productivity_score} / 14.4</p>
+               <p className="text-primary-700 font-semibold text-xl">{existingLog.productivity_score} / 10.0</p>
              </div>
            </div>
            
