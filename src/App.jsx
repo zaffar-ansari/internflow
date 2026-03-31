@@ -86,7 +86,13 @@ export default function App() {
               <Route path="/admin/assign"       element={<AssignInterns />} />
               <Route path="/admin/export"       element={<ExportLogs />} />
               <Route path="/admin/profile"      element={<AdminProfile />} />
-              <Route path="/admin/requests"     element={<AdminRequests />} />
+            </Route>
+          </Route>
+
+          {/* Requests — admin + dept_head ONLY (staff excluded) */}
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'dept_head']} />}>
+            <Route element={<Layout />}>
+              <Route path="/admin/requests" element={<AdminRequests />} />
             </Route>
           </Route>
         </Routes>

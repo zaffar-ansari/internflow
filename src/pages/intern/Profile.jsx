@@ -101,9 +101,20 @@ export default function Profile() {
           <div className="text-center sm:text-left pt-2">
             <h2 className="text-2xl font-bold font-heading text-gray-900 mb-2">{fullName || 'Add your name'}</h2>
             <p className="text-gray-500 font-medium">{user?.email}</p>
-            <div className={`mt-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-primary-100 text-primary-800'} backdrop-blur-md border border-${role === 'admin' ? 'purple' : 'primary'}-200`}>
-              {role === 'admin' ? '🔥 Admin' : '✨ Intern'}
-            </div>
+            {(() => {
+              const roleMap = {
+                admin:     { label: 'Admin',         emoji: '🔥', bg: 'bg-red-100 text-red-800 border-red-200' },
+                dept_head: { label: 'Dept Head',     emoji: '🏢', bg: 'bg-purple-100 text-purple-800 border-purple-200' },
+                staff:     { label: 'Staff',         emoji: '👔', bg: 'bg-blue-100 text-blue-800 border-blue-200' },
+                intern:    { label: 'Intern',        emoji: '✨', bg: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+              }
+              const r = roleMap[role] || { label: role, emoji: '👤', bg: 'bg-gray-100 text-gray-700 border-gray-200' }
+              return (
+                <div className={`mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${r.bg}`}>
+                  <span>{r.emoji}</span> {r.label}
+                </div>
+              )
+            })()}
           </div>
         </div>
 

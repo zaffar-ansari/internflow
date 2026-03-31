@@ -16,10 +16,11 @@ export default function Sidebar() {
   const [pendingCount, setPendingCount] = useState(0)
 
   const isAdmin = ['admin', 'staff', 'dept_head'].includes(role)
+  const canApprove = ['admin', 'dept_head'].includes(role)  // staff cannot approve
 
-  // Fetch pending request count for admin badge
+  // Only admin + dept_head see pending count
   useEffect(() => {
-    if (!isAdmin) return
+    if (!canApprove) return
     const fetchPending = async () => {
       const { count } = await supabase
         .from('users')
@@ -28,10 +29,9 @@ export default function Sidebar() {
       setPendingCount(count || 0)
     }
     fetchPending()
-    // Refresh every 30s
     const interval = setInterval(fetchPending, 30000)
     return () => clearInterval(interval)
-  }, [isAdmin])
+  }, [canApprove])
 
   const internLinks = [
     { name: 'Dashboard',   path: '/dashboard',    icon: Home },
@@ -41,13 +41,14 @@ export default function Sidebar() {
     { name: 'Profile',     path: '/profile',      icon: User },
   ]
 
+  // Build admin nav — Requests only for admin + dept_head
   const adminLinks = [
     { name: 'Overview',  path: '/admin',           icon: LayoutDashboard },
     { name: 'Interns',   path: '/admin/interns',   icon: Users },
     { name: 'Projects',  path: '/admin/projects',  icon: Briefcase },
     { name: 'Assign',    path: '/admin/assign',    icon: FileSpreadsheet },
     { name: 'Export',    path: '/admin/export',    icon: Download },
-    { name: 'Requests',  path: '/admin/requests',  icon: Bell, badge: pendingCount },
+    ...(canApprove ? [{ name: 'Requests', path: '/admin/requests', icon: Bell, badge: pendingCount }] : []),
     { name: 'Profile',   path: '/admin/profile',   icon: User },
   ]
 
@@ -71,7 +72,15 @@ export default function Sidebar() {
   }
 
   const close = () => setIsOpen(false)
-  const roleLabel = { admin: 'Admin', staff: 'Staff', dept_head: 'Dept Head', intern: 'Intern' }[role] || role
+
+  // Role label + color per role
+  const roleConfig = {
+    admin:     { label: 'Admin',          color: 'text-red-600' },
+    dept_head: { label: 'Dept Head',      color: 'text-purple-600' },
+    staff:     { label: 'Staff',          color: 'text-blue-600' },
+    intern:    { label: 'Intern',         color: 'text-indigo-600' },
+  }
+  const { label: roleLabel, color: roleColor } = roleConfig[role] || { label: role, color: 'text-gray-500' }
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
@@ -118,7 +127,7 @@ export default function Sidebar() {
             <p className="text-xs font-bold text-gray-900 truncate">
               {user?.user_metadata?.full_name || user?.email?.split('@')[0]}
             </p>
-            <span className="text-[10px] text-indigo-600 font-semibold uppercase tracking-wider">{roleLabel}</span>
+            <span className={`text-[10px] font-bold uppercase tracking-wider ${roleColor}`}>{roleLabel}</span>
           </div>
         </div>
         <button

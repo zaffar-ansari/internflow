@@ -87,19 +87,15 @@ export default function AdminRequests() {
 
   return (
     <div className="space-y-5 pb-10 animate-fade-in">
-      <div className="flex items-center justify-between">
-        <PageHeader
-          title="Access Requests"
-          description="Approve or reject new user role requests"
-        />
+      <PageHeader title="Access Requests" description="Approve or reject new user role requests">
         <button
           type="button"
           onClick={fetchRequests}
-          className="p-2 rounded-xl bg-white border border-gray-100 hover:bg-gray-50 text-gray-400 transition-colors"
+          className="inline-flex items-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 text-white rounded-xl text-xs font-bold transition-colors"
         >
-          <RefreshCw size={16} />
+          <RefreshCw size={13} /> Refresh
         </button>
-      </div>
+      </PageHeader>
 
       {requests.length === 0 ? (
         <div className="text-center py-20 bg-white rounded-2xl border border-gray-100">
