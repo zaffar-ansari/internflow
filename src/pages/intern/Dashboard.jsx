@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom'
 import StatCard from '../../components/ui/StatCard'
 import GlassCard from '../../components/ui/GlassCard'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
+import PageHeader from '../../components/layout/PageHeader'
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -62,21 +63,13 @@ export default function Dashboard() {
 
   if (loading) return <LoadingSpinner />
 
-  const firstName = user?.user_metadata?.full_name?.split(' ')[0] || 'there'
-  const todayFormatted = format(new Date(), 'EEEE, MMMM d')
-
   const getMoodEmoji = mood => ({ great: '😄', good: '🙂', okay: '😐', struggling: '😟' }[mood] || '🙂')
 
   return (
     <div className="space-y-5 pb-10 animate-fade-in">
 
-      {/* ── Hero Header ── */}
-      <div className="bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-2xl p-5 sm:p-6 text-white">
-        <p className="text-indigo-200 text-xs font-semibold uppercase tracking-widest mb-1">{todayFormatted}</p>
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tight mb-4">
-          Hey, {firstName} 👋
-        </h1>
-
+      {/* ── Hero Header via PageHeader ── */}
+      <PageHeader title="My Dashboard" greeting>
         {stats.loggedToday ? (
           <div className="flex items-center gap-2 bg-white/20 rounded-xl px-4 py-2.5 text-sm font-semibold w-fit">
             <CheckCircle size={16} className="text-green-300" />
@@ -90,7 +83,7 @@ export default function Dashboard() {
             <Plus size={16} /> Post Today's Update
           </Link>
         )}
-      </div>
+      </PageHeader>
 
       {/* ── Stat Cards ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

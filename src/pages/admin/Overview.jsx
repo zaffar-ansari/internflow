@@ -305,7 +305,11 @@ export default function AdminOverview() {
 
   return (
     <div className="space-y-6 pb-10 animate-fade-in">
-      <PageHeader title="Admin Overview" description={format(new Date(), 'EEEE, MMMM d, yyyy')} />
+      <PageHeader title="Command Center" greeting>
+        <p className="text-indigo-200 text-sm">
+          {stats.logsToday} log{stats.logsToday !== 1 ? 's' : ''} today &nbsp;·&nbsp; {stats.totalInterns} interns
+        </p>
+      </PageHeader>
 
       {/* Stat Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
@@ -357,26 +361,36 @@ export default function AdminOverview() {
 
       {/* Recent Log Reports — grouped by Project */}
       <div>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div className="flex flex-col gap-3 mb-4">
+          {/* Title row */}
           <h3 className="text-base font-bold text-gray-900 flex items-center gap-2">
             <FileText className="w-5 h-5 text-indigo-500 flex-shrink-0" /> Log Reports
           </h3>
-          <div className="flex items-center gap-1 bg-white rounded-xl border border-gray-200 p-1 flex-wrap">
-            {filterBtns.map(f => (
-              <button
-                key={f}
-                onClick={() => { setDateFilter(f); setCustomDate('') }}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors ${dateFilter === f ? 'bg-indigo-50 text-indigo-700' : 'text-gray-400 hover:text-gray-700'
+          {/* Filter pills — wrap naturally on mobile */}
+          <div className="flex flex-wrap items-center gap-1.5">
+            <div className="flex items-center gap-1 bg-white rounded-xl border border-gray-200 p-1">
+              {filterBtns.map(f => (
+                <button
+                  key={f}
+                  type="button"
+                  onClick={() => { setDateFilter(f); setCustomDate('') }}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-colors ${
+                    dateFilter === f ? 'bg-indigo-50 text-indigo-700' : 'text-gray-400 hover:text-gray-700'
                   }`}
-              >{f}</button>
-            ))}
-            <input
-              type="date"
-              value={customDate}
-              onChange={e => { setCustomDate(e.target.value); if (e.target.value) setDateFilter('custom'); else setDateFilter('all') }}
-              className={`text-xs px-2 py-1.5 rounded-lg border-none outline-none cursor-pointer ${dateFilter === 'custom' ? 'text-indigo-700 bg-indigo-50' : 'text-gray-400 bg-transparent'
-                }`}
-            />
+                >{f}</button>
+              ))}
+            </div>
+            {/* Date picker — stands alone on its own pill */}
+            <div className={`flex items-center px-3 py-1.5 rounded-xl border text-xs font-bold cursor-pointer transition-colors ${
+              dateFilter === 'custom' ? 'border-indigo-300 bg-indigo-50 text-indigo-700' : 'border-gray-200 bg-white text-gray-400'
+            }`}>
+              <input
+                type="date"
+                value={customDate}
+                onChange={e => { setCustomDate(e.target.value); if (e.target.value) setDateFilter('custom'); else setDateFilter('all') }}
+                className="bg-transparent outline-none cursor-pointer w-32 text-xs"
+              />
+            </div>
           </div>
         </div>
 
