@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { User, Mail, Lock, Check } from 'lucide-react'
+import { User, Mail, Lock, Check, Calendar, Award, CheckCircle2 } from 'lucide-react'
+import { format, parseISO } from 'date-fns'
 import toast from 'react-hot-toast'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
@@ -13,6 +14,12 @@ export default function Profile() {
   const [fullName, setFullName] = useState('')
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [internshipInfo, setInternshipInfo] = useState({
+    joining_date: '',
+    end_date: '',
+    is_certified: false,
+    internship_status: 'incomplete'
+  })
 
   // Password change
   const [password, setPassword] = useState('')
@@ -24,12 +31,18 @@ export default function Profile() {
       try {
         const { data, error } = await supabase
           .from('users')
-          .select('full_name')
+          .select('full_name, joining_date, end_date, is_certified, internship_status')
           .eq('id', user.id)
           .single()
 
         if (error) throw error
         setFullName(data?.full_name || '')
+        setInternshipInfo({
+          joining_date: data?.joining_date || '',
+          end_date: data?.end_date || '',
+          is_certified: data?.is_certified ?? false,
+          internship_status: data?.internship_status || 'incomplete'
+        })
       } catch (error) {
         console.error('Error fetching profile:', error)
       } finally {
@@ -117,6 +130,49 @@ export default function Profile() {
             })()}
           </div>
         </div>
+
+        {role === 'intern' && (
+          <div className="mb-8 grid grid-cols-1 sm:grid-cols-3 gap-4 border-t border-gray-100 pt-8 animate-fade-in">
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1 flex items-center gap-1.5">
+                <Calendar size={12} /> Internship Period
+              </p>
+              <p className="text-sm font-bold text-gray-900">
+                {internshipInfo.joining_date ? format(parseISO(internshipInfo.joining_date), 'MMM d, yy') : 'Not set'} 
+                <span className="mx-2 text-gray-300">→</span>
+                {internshipInfo.end_date ? format(parseISO(internshipInfo.end_date), 'MMM d, yy') : 'Present'}
+              </p>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1 flex items-center gap-1.5">
+                <Award size={12} /> Performance Status
+              </p>
+              <span className={`text-[10px] font-black uppercase py-0.5 px-2 rounded-full ring-1 ring-inset ${
+                internshipInfo.internship_status === 'completed' ? 'bg-blue-50 text-blue-700 ring-blue-600/20' :
+                internshipInfo.internship_status === 'high performer' ? 'bg-purple-50 text-purple-700 ring-purple-600/20' :
+                internshipInfo.internship_status === 'top performer' ? 'bg-amber-50 text-amber-700 ring-amber-600/20' :
+                'bg-gray-100 text-gray-600 ring-gray-400/20'
+              }`}>
+                {internshipInfo.internship_status}
+              </span>
+            </div>
+            <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+              <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1 flex items-center gap-1.5">
+                <CheckCircle2 size={12} /> Certification
+              </p>
+              {internshipInfo.is_certified ? (
+                <div className="flex items-center gap-1.5 text-blue-600">
+                   <div className="w-5 h-5 bg-blue-100 rounded-full flex items-center justify-center">
+                     <Check size={12} strokeWidth={4} />
+                   </div>
+                   <span className="text-xs font-black uppercase tracking-wider">Certified</span>
+                </div>
+              ) : (
+                <span className="text-xs font-bold text-gray-400">Review pending</span>
+              )}
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSaveProfile} className="space-y-6">
           <div>

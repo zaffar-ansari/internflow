@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react'
-import { Search, ChevronDown, ChevronUp, MessageSquare, Trash2, AlertTriangle, Loader2 } from 'lucide-react'
+import { Search, ChevronDown, ChevronUp, MessageSquare, Trash2, AlertTriangle, Loader2, Calendar, Award, CheckCircle2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../context/AuthContext'
-import { format, parseISO, differenceInCalendarDays, startOfDay, subDays } from 'date-fns'
+import { format, parseISO, differenceInCalendarDays, startOfDay, subDays, isValid } from 'date-fns'
 import PageHeader from '../../components/layout/PageHeader'
 import GlassCard from '../../components/ui/GlassCard'
 import LoadingSpinner from '../../components/ui/LoadingSpinner'
@@ -21,6 +21,10 @@ export default function AdminInterns() {
   // Delete confirmation state
   const [deleteTarget, setDeleteTarget] = useState(null)   // intern object
   const [deleting, setDeleting]         = useState(false)
+
+  // Edit states for internship tracking
+  const [editingIntern, setEditingIntern] = useState(null) // intern ID being saved
+  const [updateLoading, setUpdateLoading] = useState(false)
 
   useEffect(() => { fetchInterns() }, [])
 
@@ -55,7 +59,19 @@ export default function AdminInterns() {
           ? (internLogs.reduce((a, l) => a + Number(l.productivity_score), 0) / internLogs.length).toFixed(1) : 0
         const lastLogDate = internLogs[0]?.log_date || null
         const isActive    = lastLogDate && differenceInCalendarDays(new Date(), parseISO(lastLogDate)) <= 7
-        return { ...intern, streak, avgScore, lastLogDate, recentLogs: internLogs.slice(0, 5), isActive }
+        return {
+          ...intern,
+          streak,
+          avgScore,
+          lastLogDate,
+          recentLogs: internLogs.slice(0, 5),
+          isActive,
+          // Handle default values for new columns
+          joining_date: intern.joining_date || '',
+          end_date: intern.end_date || '',
+          is_certified: intern.is_certified ?? false,
+          internship_status: intern.internship_status || 'incomplete'
+        }
       })
       setInterns(processedInterns)
     } catch (error) {
@@ -121,6 +137,29 @@ export default function AdminInterns() {
     }
   }
 
+  // ── Update internship status ──
+  const handleUpdateTracking = async (internId, data) => {
+    setUpdateLoading(true)
+    setEditingIntern(internId)
+    try {
+      const { error } = await supabase
+        .from('users')
+        .update(data)
+        .eq('id', internId)
+
+      if (error) throw error
+
+      setInterns(prev => prev.map(i => i.id === internId ? { ...i, ...data } : i))
+      toast.success('Internship data updated!')
+    } catch (err) {
+      console.error(err)
+      toast.error(err.message || 'Update failed')
+    } finally {
+      setEditingIntern(null)
+      setUpdateLoading(false)
+    }
+  }
+
   if (loading) return <LoadingSpinner />
 
   const filtered = interns.filter(i =>
@@ -172,6 +211,18 @@ export default function AdminInterns() {
                           <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${intern.isActive ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
                             {intern.isActive ? 'Active' : 'Inactive'}
                           </span>
+                          {intern.internship_status !== 'incomplete' && (
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                              intern.internship_status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                              intern.internship_status === 'high performer' ? 'bg-purple-100 text-purple-700' :
+                              'bg-amber-100 text-amber-700'
+                            }`}>
+                              {intern.internship_status}
+                            </span>
+                          )}
+                          {intern.is_certified && (
+                            <CheckCircle2 size={14} className="text-blue-500" title="Certified" />
+                          )}
                           {intern.streak > 0 && (
                             <span className="text-orange-500 text-xs font-bold">🔥{intern.streak}</span>
                           )}
@@ -182,7 +233,9 @@ export default function AdminInterns() {
                     {/* Stats row */}
                     <div className="flex gap-4 mt-3 pt-3 border-t border-gray-50 text-xs text-gray-500">
                       <span>Avg: <strong className="text-gray-900">{intern.avgScore}/10</strong></span>
-                      <span>Last: <strong className="text-gray-700">{intern.lastLogDate ? format(parseISO(intern.lastLogDate), 'MMM d') : 'Never'}</strong></span>
+                      {intern.joining_date && (
+                        <span>Start: <strong className="text-gray-700">{format(parseISO(intern.joining_date), 'MMM d, yy')}</strong></span>
+                      )}
                       <span>Logs: <strong className="text-gray-700">{intern.recentLogs.length}+</strong></span>
                     </div>
                   </button>
@@ -212,7 +265,82 @@ export default function AdminInterns() {
                 {/* Expanded log details */}
                 {isExpanded && (
                   <div className="mt-4 pt-4 border-t border-gray-100 space-y-3">
-                    <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest">Recent Logs</h4>
+                    {/* Internship Tracking Section */}
+                    <div className="mt-6 pt-5 border-t border-dashed border-gray-200">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-4">
+                        <h4 className="flex items-center gap-2 text-xs font-black uppercase text-gray-900 tracking-widest">
+                          <Award className="w-4 h-4" /> Internship Tracking
+                        </h4>
+                        {(intern.is_certified || intern.internship_status !== 'incomplete') && (
+                          <div className="flex items-center gap-2 text-xs font-bold text-gray-700 bg-gray-50 px-3 py-1.5 rounded-xl border border-gray-100">
+                            Status: <span className="uppercase text-gray-900">{intern.internship_status}</span>
+                            {intern.is_certified && <span className="ml-1 px-1.5 py-0.5 bg-blue-600 text-white rounded text-[10px]">CERTIFIED ✓</span>}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                        <div>
+                          <label className="block text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1.5">Joining Date</label>
+                          <div className="relative">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                            <input
+                              type="date"
+                              defaultValue={intern.joining_date}
+                              onChange={(e) => handleUpdateTracking(intern.id, { joining_date: e.target.value })}
+                              className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:ring-1 focus:ring-gray-800 outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1.5">End Date</label>
+                          <div className="relative">
+                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
+                            <input
+                              type="date"
+                              defaultValue={intern.end_date}
+                              onChange={(e) => handleUpdateTracking(intern.id, { end_date: e.target.value })}
+                              className="w-full pl-9 pr-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:ring-1 focus:ring-gray-800 outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-black uppercase text-gray-400 tracking-widest mb-1.5">Status</label>
+                          <select
+                            value={intern.internship_status}
+                            onChange={(e) => handleUpdateTracking(intern.id, { internship_status: e.target.value })}
+                            className="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-xs focus:ring-1 focus:ring-gray-800 outline-none"
+                          >
+                            <option value="incomplete">Incomplete</option>
+                            <option value="completed">Completed</option>
+                            <option value="high performer">High Performer</option>
+                            <option value="top performer">Top Performer</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <button
+                            onClick={() => handleUpdateTracking(intern.id, { is_certified: !intern.is_certified })}
+                            className={`w-full py-2 px-4 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition-all ${
+                              intern.is_certified
+                                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                : 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+                            }`}
+                          >
+                            {editingIntern === intern.id && updateLoading ? (
+                              <Loader2 size={14} className="animate-spin" />
+                            ) : (
+                              intern.is_certified ? <CheckCircle2 size={14} /> : <Award size={14} />
+                            )}
+                            {intern.is_certified ? 'Certified' : 'Issue Certificate'}
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <h4 className="mt-8 text-xs font-black uppercase text-gray-400 tracking-widest">Recent Logs</h4>
                     {intern.recentLogs.length === 0 ? (
                       <p className="text-sm text-gray-400">No logs yet.</p>
                     ) : (
