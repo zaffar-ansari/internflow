@@ -3,7 +3,7 @@ import { format } from 'date-fns'
 import { useAuth } from '../../context/AuthContext'
 
 /**
- * Unified B&W hero page header — Arova brand aesthetic.
+ * Unified B&W hero page header.
  * Props:
  *   title       – main heading (required)
  *   description – subtitle line (optional)

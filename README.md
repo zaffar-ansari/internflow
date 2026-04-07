@@ -1,7 +1,7 @@
 # 🚀 Intern~Flow
 ### *Empowering Interns, Streamlining Workflows.*
 
-🔗 **Live App:** [internflow-arova.netlify.app](https://internflow-arova.netlify.app)
+🔗 **Live App:** [internflow.netlify.app](https://internflow-arova.netlify.app)
 
 ---
 
@@ -111,4 +111,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 **Sxmxd Code** - [GitHub](https://github.com/sxmxd-code)  
 Project Link: [https://github.com/sxmxd-code/Intern-Flow](https://github.com/sxmxd-code/Intern-Flow)
 
-**Developed with ❤️ for Arova Technologies**
+**Developed with ❤️ by the InternFlow Team**

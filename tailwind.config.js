@@ -11,7 +11,7 @@ export default {
         body:    ['"DM Sans"', 'sans-serif'],
       },
       colors: {
-        // Brand: B&W — Arova palette
+        // Brand: B&W palette
         primary: {
           50:  '#f9fafb',   // near-white
           100: '#f3f4f6',   // light gray

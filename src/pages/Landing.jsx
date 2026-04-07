@@ -91,7 +91,7 @@ export default function Landing() {
       {/* Footer */}
       <footer className="py-8 flex flex-col items-center gap-3 text-center text-gray-500 text-sm font-medium border-t border-white/20 bg-white/20 backdrop-blur-md">
         <Logo size="sm" className="opacity-70 grayscale hover:grayscale-0 transition-all duration-300" />
-        <p>Built for Arova Technologies &middot; Intern~Flow v1.0</p>
+        <p>Intern~Flow v1.0</p>
       </footer>
     </div>
   )
