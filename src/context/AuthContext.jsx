@@ -13,7 +13,9 @@ export function AuthProvider({ children }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null)
       if (session?.user) {
-        fetchProfile(session.user.id)
+        checkAndSyncMetadata(session.user).then(() => {
+          fetchProfile(session.user.id)
+        })
       } else {
         setLoading(false)
       }
@@ -22,7 +24,9 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) {
-        fetchProfile(session.user.id)
+        checkAndSyncMetadata(session.user).then(() => {
+          fetchProfile(session.user.id)
+        })
       } else {
         setRole(null)
         setStatus(null)
@@ -32,6 +36,23 @@ export function AuthProvider({ children }) {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  const checkAndSyncMetadata = async (sessionUser) => {
+    try {
+      const { requested_role, full_name } = sessionUser.user_metadata || {}
+      if (requested_role) {
+        // Fire-and-forget update to ensure DB has what was requested during signup.
+        // It updates only if it's currently null to prevent overriding any admin changes.
+        await supabase
+          .from('users')
+          .update({ requested_role, full_name })
+          .eq('id', sessionUser.id)
+          .is('requested_role', null)
+      }
+    } catch (err) {
+      console.error('Failed to sync metadata', err)
+    }
+  }
 
   const fetchProfile = async (userId) => {
     try {

@@ -47,37 +47,26 @@ export default function Signup() {
 
     setLoading(true)
     try {
-      // 1. Create auth user — role starts as 'pending' until admin approves
+      // 1. Create auth user
+      // Pass requested_role in metadata so the DB trigger or AuthContext can sync it.
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: { full_name: fullName },
+          data: { 
+            full_name: fullName,
+            requested_role: selectedRole
+          },
         },
       })
       if (authError) throw authError
 
-      const userId = authData?.user?.id
-      if (!userId) throw new Error('Signup failed — no user ID returned.')
+      // Note: We DO NOT perform supabase.from('users').upsert() here from the client!
+      // If email confirmations are enabled, the auth session is null, and calling upsert will fail with an RLS policy violation.
+      // Instead, a DB trigger (handle_new_user) generates the public.users row.
+      // The requested_role will be synced on their first login via AuthContext.
 
-      // 2. Insert/update users row — role='intern' (valid default),
-      //    status='pending' blocks access until admin approves,
-      //    requested_role stores what they actually want
-      const { error: dbError } = await supabase
-        .from('users')
-        .upsert({
-          id: userId,
-          email,
-          full_name: fullName,
-          role: 'intern',            // valid DB value — won't violate check constraint
-          requested_role: selectedRole, // what they actually want
-          status: 'pending',         // blocks login until admin approves
-        })
-
-      if (dbError) throw dbError
-
-      // Sign out immediately — user must log in explicitly.
-      // This prevents auto-login bypass since email confirmation is disabled.
+      // If user session is somehow active (email conf disabled), we sign out just in case
       await supabase.auth.signOut()
 
       setShowSuccess(true)

@@ -44,7 +44,7 @@ export default function AdminRequests() {
       const { data, error } = await supabase
         .from('users')
         .update({
-          role:   user.requested_role,  // grant the requested role
+          role:   user.requested_role || 'intern',  // grant the requested role, fallback to intern if null
           status: 'approved',
         })
         .eq('id', user.id)
@@ -108,7 +108,7 @@ export default function AdminRequests() {
       ) : (
         <div className="space-y-3">
           {requests.map(req => {
-            const roleInfo = ROLE_LABELS[req.requested_role] || { label: req.requested_role, color: 'bg-gray-50 text-gray-700 border-gray-100', icon: '👤' }
+            const roleInfo = ROLE_LABELS[req.requested_role] || { label: req.requested_role || 'Waiting for setup...', color: 'bg-gray-50 text-gray-700 border-gray-300', icon: '⏳' }
             const isActing = acting[req.id]
 
             return (
